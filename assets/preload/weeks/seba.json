@@ -1,0 +1,48 @@
+{
+	"storyName": "",
+	"hideFreeplay": false,
+	"weekBackground": "vseba",
+	"weekBefore": "tutorial",
+	"freeplayColor": [
+		146,
+		113,
+		253
+	],
+	"startUnlocked": true,
+	"hideStoryMode": false,
+	"weekCharacters": [
+		"",
+		"",
+		""
+	],
+	"songs": [
+		[
+			"morning",
+			"seba",
+			[
+				129,
+				109,
+				162
+			]
+		],
+		[
+			"force",
+			"sebangry",
+			[
+				129,
+				109,
+				162
+			]
+		],
+		[
+			"hellworld",
+			"sebademon",
+			[
+				65,
+				87,
+				100
+			]
+		]
+	],
+	"weekName": ""
+}

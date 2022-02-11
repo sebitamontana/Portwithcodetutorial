@@ -1,0 +1,39 @@
+{
+	"storyName": "Your New Week",
+	"hideFreeplay": true,
+	"weekBackground": "stage",
+	"freeplayColor": [
+		146,
+		113,
+		253
+	],
+	"weekBefore": "tutorial",
+	"startUnlocked": true,
+	"hideStoryMode": true,
+	"weekCharacters": [
+		"dad",
+		"bf",
+		"gf"
+	],
+	"songs": [
+		[
+			"endless",
+			"seba",
+			[
+				146,
+				113,
+				253
+			]
+		],
+		[
+			"old-force",
+			"dad",
+			[
+				146,
+				113,
+				253
+			]
+		]
+	],
+	"weekName": "Custom Week"
+}
