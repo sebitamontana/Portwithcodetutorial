@@ -1,0 +1,78 @@
+{
+	"animations": [
+		{
+			"loop": false,
+			"offsets": [
+				40,
+				-260
+			],
+			"anim": "idle",
+			"fps": 24,
+			"name": "sebaIDLE",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				78,
+				-265
+			],
+			"anim": "singLEFT",
+			"fps": 24,
+			"name": "sebaLEFT",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				57,
+				-295
+			],
+			"anim": "singDOWN",
+			"fps": 24,
+			"name": "sebaDown",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				66,
+				-260
+			],
+			"anim": "singRIGHT",
+			"fps": 24,
+			"name": "sebaRIGHT",
+			"indices": []
+		},
+		{
+			"loop": false,
+			"offsets": [
+				100,
+				-227
+			],
+			"anim": "singUP",
+			"fps": 24,
+			"name": "sebaUP",
+			"indices": []
+		}
+	],
+	"no_antialiasing": false,
+	"image": "characters/seba_angry",
+	"position": [
+		100,
+		80
+	],
+	"healthicon": "seba",
+	"flip_x": false,
+	"healthbar_colors": [
+		129,
+		109,
+		166
+	],
+	"camera_position": [
+		-160,
+		310
+	],
+	"sing_duration": 6.1,
+	"scale": 1.1
+}
