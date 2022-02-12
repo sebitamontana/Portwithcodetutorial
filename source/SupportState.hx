@@ -11,7 +11,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
-class FlashingState extends MusicBeatState
+class SupportState extends MusicBeatState
 {
 	public static var leftState:Bool = false;
 
@@ -24,11 +24,11 @@ class FlashingState extends MusicBeatState
 		add(bg);
 
 		warnText = new FlxText(0, 0, FlxG.width,
-			"Hey, watch out!\n
-			This Mod contains some flashing lights!\n
-			Press ENTER to disable them now or go to Options Menu.\n
-			Press ESCAPE to ignore this message.\n
-			You've been warned!",
+			"Hey!\n
+			Dont forget to support \n
+			The Psych Engine Crew\n
+			and also to us\n
+			The Vs. Seba Crew!",
 			32);
 		warnText.setFormat("VCR OSD Mono", 32, FlxColor.WHITE, CENTER);
 		warnText.screenCenter(Y);
@@ -47,6 +47,7 @@ class FlashingState extends MusicBeatState
 					ClientPrefs.flashing = false;
 					ClientPrefs.saveSettings();
 					FlxG.sound.play(Paths.sound('confirmMenu'));
+					FlxG.camera.flash(FlxColor.WHITE, 1);
 					FlxFlicker.flicker(warnText, 1, 0.1, false, true, function(flk:FlxFlicker) {
 						new FlxTimer().start(0.5, function (tmr:FlxTimer) {
 							MusicBeatState.switchState(new TitleState());

@@ -24,14 +24,14 @@ using StringTools;
 
 class MainMenuState extends MusicBeatState
 {
-	public static var psychEngineVersion:String = '0.4.2'; //This is also used for Discord RPC
+	public static var psychEngineVersion:String = '0.4.1'; //This is also used for Discord RPC
 	public static var curSelected:Int = 0;
 
 	var menuItems:FlxTypedGroup<FlxSprite>;
 	private var camGame:FlxCamera;
 	private var camAchievement:FlxCamera;
 	
-	var optionShit:Array<String> = ['story_mode', 'freeplay', #if ACHIEVEMENTS_ALLOWED 'awards', #end 'credits', #if !switch 'donate', #end 'options'];
+	var optionShit:Array<String> = ['story_mode', 'freeplay', 'credits', 'awards', #if !switch 'donate', #end 'options'];
 
 	var magenta:FlxSprite;
 	var camFollow:FlxObject;
@@ -94,7 +94,7 @@ class MainMenuState extends MusicBeatState
 			menuItem.animation.addByPrefix('selected', optionShit[i] + " white", 24);
 			menuItem.animation.play('idle');
 			menuItem.ID = i;
-			menuItem.screenCenter(X);
+			menuItem.x = 100;
 			menuItems.add(menuItem);
 			var scr:Float = (optionShit.length - 4) * 0.135;
 			if(optionShit.length < 6) scr = 0;
@@ -104,16 +104,32 @@ class MainMenuState extends MusicBeatState
 			menuItem.updateHitbox();
 		}
 
+		if (FlxG.random.bool(0.5))
+		{
+			Application.current.window.title = Main.appTitle + ' - Main Menu';
+		}
+		else 
+		{	
+			Application.current.window.title = Main.appTitle + ' - Main Menu';
+		}
 		FlxG.camera.follow(camFollowPos, null, 1);
 
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, 0, "Psych Engine v" + psychEngineVersion, 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 44, -0, "Psych Engine v" + psychEngineVersion, 12);
 		versionShit.scrollFactor.set();
+		versionShit.x = 1067;
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
-		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, 0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 12);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 24, -0, "Friday Night Funkin' v" + Application.current.meta.get('version'), 12);
 		versionShit.scrollFactor.set();
+		versionShit.x = 1030;
 		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		add(versionShit);
+		var versionShit:FlxText = new FlxText(12, FlxG.height - 64, -0, "Vs Seba v1.1", 12);
+		versionShit.scrollFactor.set();
+		versionShit.x = 1095;
+		versionShit.setFormat("VCR OSD Mono", 16, FlxColor.WHITE, LEFT, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
+		add(versionShit);
+
 
 		// NG.core.calls.event.logEvent('swag').send();
 
@@ -122,18 +138,11 @@ class MainMenuState extends MusicBeatState
 		#if ACHIEVEMENTS_ALLOWED
 		Achievements.loadAchievements();
 		var leDate = Date.now();
-		if (leDate.getDay() == 5 && leDate.getHours() >= 18) {
-			var achieveID:Int = Achievements.getAchievementIndex('friday_night_play');
-			if(!Achievements.isAchievementUnlocked(Achievements.achievementsStuff[achieveID][2])) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
-				Achievements.achievementsMap.set(Achievements.achievementsStuff[achieveID][2], true);
-				giveAchievement();
-				ClientPrefs.saveSettings();
-			}
+		if (!Achievements.achievementsUnlocked[achievementID][1] && leDate.getDay() == 5 && leDate.getHours() >= 18) { //It's a friday night. WEEEEEEEEEEEEEEEEEE
+			Achievements.achievementsUnlocked[achievementID][1] = true;
+			giveAchievement();
+			ClientPrefs.saveSettings();
 		}
-		#end
-
-		#if mobileC
-		addVirtualPad(UP_DOWN, A_B_C);
 		#end
 
 		super.create();
@@ -141,10 +150,11 @@ class MainMenuState extends MusicBeatState
 
 	#if ACHIEVEMENTS_ALLOWED
 	// Unlocks "Freaky on a Friday Night" achievement
+	var achievementID:Int = 0;
 	function giveAchievement() {
-		add(new AchievementObject('friday_night_play', camAchievement));
+		add(new AchievementObject(achievementID, camAchievement));
 		FlxG.sound.play(Paths.sound('confirmMenu'), 0.7);
-		trace('Giving achievement "friday_night_play"');
+		trace('Giving achievement ' + achievementID);
 	}
 	#end
 
@@ -219,7 +229,7 @@ class MainMenuState extends MusicBeatState
 									case 'freeplay':
 										MusicBeatState.switchState(new FreeplayState());
 									case 'awards':
-										MusicBeatState.switchState(new AchievementsMenuState());
+										MusicBeatState.switchState(new OutdatedSubState());
 									case 'credits':
 										MusicBeatState.switchState(new CreditsState());
 									case 'options':
@@ -230,18 +240,22 @@ class MainMenuState extends MusicBeatState
 					});
 				}
 			}
-			else if (FlxG.keys.justPressed.SEVEN #if mobileC || _virtualpad.buttonC.justPressed #end)
+			//COMPILE THE GAME IN DEBUG MODE TO ACCESS TO THE EDITOR 
+			                                   // -ElFranex
+			#if desktop
+			else if (FlxG.keys.justPressed.SEVEN)
 			{
 				selectedSomethin = true;
 				MusicBeatState.switchState(new MasterEditorMenu());
 			}
+			#end
 		}
 
 		super.update(elapsed);
 
 		menuItems.forEach(function(spr:FlxSprite)
 		{
-			spr.screenCenter(X);
+			
 		});
 	}
 

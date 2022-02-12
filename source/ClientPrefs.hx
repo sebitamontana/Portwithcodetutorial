@@ -7,6 +7,7 @@ import flixel.graphics.FlxGraphic;
 import Controls;
 
 class ClientPrefs {
+	//TO DO: Redo ClientPrefs in a way that isn't too stupid
 	public static var downScroll:Bool = false;
 	public static var middleScroll:Bool = false;
 	public static var showFPS:Bool = true;
@@ -20,39 +21,46 @@ class ClientPrefs {
 	public static var camZooms:Bool = true;
 	public static var hideHud:Bool = false;
 	public static var noteOffset:Int = 0;
-	public static var speed:Float = 2;
-	public static var noteSize:Float = 0.7;
-	public static var scroll:Bool = false;
 	public static var arrowHSV:Array<Array<Int>> = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
 	public static var imagesPersist:Bool = false;
 	public static var ghostTapping:Bool = true;
 	public static var hideTime:Bool = false;
 
-	//Every key has two binds, these binds are defined on defaultKeys! If you want your control to be changeable, you have to add it on ControlsSubState (inside OptionsState.hx)'s list
-	public static var keyBinds:Map<String, Dynamic> = new Map<String, Dynamic>();
-	public static var defaultKeys:Map<String, Dynamic>;
+	public static var defaultKeys:Array<FlxKey> = [
+		A, LEFT,			//Note Left
+		S, DOWN,			//Note Down
+		W, UP,				//Note Up
+		D, RIGHT,			//Note Right
 
-	public static function startControls() {
+		A, LEFT,			//UI Left
+		S, DOWN,			//UI Down
+		W, UP,				//UI Up
+		D, RIGHT,			//UI Right
+
+		R, NONE,			//Reset
+		SPACE, ENTER,		//Accept
+		BACKSPACE, ESCAPE,	//Back
+		ENTER, ESCAPE		//Pause
+	];
+	//Every key has two binds, these binds are defined on defaultKeys! If you want your control to be changeable, you have to add it on ControlsSubState (inside OptionsState)'s list
+	public static var keyBinds:Array<Dynamic> = [
 		//Key Bind, Name for ControlsSubState
-		keyBinds.set('note_left', [A, LEFT]);
-		keyBinds.set('note_down', [S, DOWN]);
-		keyBinds.set('note_up', [W, UP]);
-		keyBinds.set('note_right', [D, RIGHT]);
-		
-		keyBinds.set('ui_left', [A, LEFT]);
-		keyBinds.set('ui_down', [S, DOWN]);
-		keyBinds.set('ui_up', [W, UP]);
-		keyBinds.set('ui_right', [D, RIGHT]);
-		
-		keyBinds.set('accept', [SPACE, ENTER]);
-		keyBinds.set('back', [BACKSPACE, ESCAPE]);
-		keyBinds.set('pause', [ENTER, ESCAPE]);
-		keyBinds.set('reset', [R, NONE]);
+		[Control.NOTE_LEFT, 'Left'],
+		[Control.NOTE_DOWN, 'Down'],
+		[Control.NOTE_UP, 'Up'],
+		[Control.NOTE_RIGHT, 'Right'],
 
+		[Control.UI_LEFT, 'Left '],		//Added a space for not conflicting on ControlsSubState
+		[Control.UI_DOWN, 'Down '],		//Added a space for not conflicting on ControlsSubState
+		[Control.UI_UP, 'Up '],			//Added a space for not conflicting on ControlsSubState
+		[Control.UI_RIGHT, 'Right '],	//Added a space for not conflicting on ControlsSubState
 
-		// Don't delete this
-		defaultKeys = keyBinds.copy();
-	}
+		[Control.RESET, 'Reset'],
+		[Control.ACCEPT, 'Accept'],
+		[Control.BACK, 'Back'],
+		[Control.PAUSE, 'Pause']
+	];
+	public static var lastControls:Array<FlxKey> = defaultKeys.copy();
 
 	public static function saveSettings() {
 		FlxG.save.data.downScroll = downScroll;
@@ -63,11 +71,8 @@ class ClientPrefs {
 		FlxG.save.data.noteSplashes = noteSplashes;
 		FlxG.save.data.lowQuality = lowQuality;
 		FlxG.save.data.framerate = framerate;
-		//FlxG.save.data.cursing = cursing;
-		//FlxG.save.data.violence = violence;
-		FlxG.save.data.speed = speed;
-		FlxG.save.data.scroll = scroll;
-		FlxG.save.data.noteSize = noteSize;
+		FlxG.save.data.cursing = cursing;
+		FlxG.save.data.violence = violence;
 		FlxG.save.data.camZooms = camZooms;
 		FlxG.save.data.noteOffset = noteOffset;
 		FlxG.save.data.hideHud = hideHud;
@@ -75,13 +80,20 @@ class ClientPrefs {
 		FlxG.save.data.imagesPersist = imagesPersist;
 		FlxG.save.data.ghostTapping = ghostTapping;
 		FlxG.save.data.hideTime = hideTime;
-		FlxG.save.data.achievementsMap = Achievements.achievementsMap;
+
+		var achieves:Array<String> = [];
+		for (i in 0...Achievements.achievementsUnlocked.length) {
+			if(Achievements.achievementsUnlocked[i][1]) {
+				achieves.push(Achievements.achievementsUnlocked[i][0]);
+			}
+		}
+		FlxG.save.data.achievementsUnlocked = achieves;
 		FlxG.save.data.henchmenDeath = Achievements.henchmenDeath;
 		FlxG.save.flush();
 
 		var save:FlxSave = new FlxSave();
-		save.bind('controls_v2', 'ninjamuffin99'); //Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
-		save.data.customControls = keyBinds;
+		save.bind('controls', 'ninjamuffin99'); //Placing this in a separate save so that it can be manually deleted without removing your Score and stuff
+		save.data.customControls = lastControls;
 		save.flush();
 		FlxG.log.add("Settings saved!");
 	}
@@ -139,15 +151,6 @@ class ClientPrefs {
 		if(FlxG.save.data.arrowHSV != null) {
 			arrowHSV = FlxG.save.data.arrowHSV;
 		}
-		if(FlxG.save.data.speed != null) {
-			speed = FlxG.save.data.speed;
-		}
-		if(FlxG.save.data.scroll != null) {
-			scroll = FlxG.save.data.scroll;
-		}
-		if(FlxG.save.data.noteSize != null) {
-			noteSize = FlxG.save.data.noteSize;
-		}
 		if(FlxG.save.data.imagesPersist != null) {
 			imagesPersist = FlxG.save.data.imagesPersist;
 			FlxGraphic.defaultPersist = ClientPrefs.imagesPersist;
@@ -158,24 +161,46 @@ class ClientPrefs {
 		if(FlxG.save.data.hideTime != null) {
 			hideTime = FlxG.save.data.hideTime;
 		}
-		
-		// flixel automatically saves your volume!
-		if(FlxG.save.data.volume != null) {
-			FlxG.sound.volume = FlxG.save.data.volume;
-		}
 
 		var save:FlxSave = new FlxSave();
-		save.bind('controls_v2', 'ninjamuffin99');
+		save.bind('controls', 'ninjamuffin99');
 		if(save != null && save.data.customControls != null) {
-			var loadedControls:Map<String, Dynamic> = save.data.customControls;
-			for (control => keys in loadedControls) {
-				keyBinds.set(control, keys);
-			}
-			reloadControls();
+			reloadControls(save.data.customControls);
 		}
 	}
 
-	public static function reloadControls() {
-		PlayerSettings.player1.controls.setKeyboardScheme(KeyboardScheme.Solo);
+	public static function reloadControls(newKeys:Array<FlxKey>) {
+		ClientPrefs.removeControls(ClientPrefs.lastControls);
+		ClientPrefs.lastControls = newKeys.copy();
+		ClientPrefs.loadControls(ClientPrefs.lastControls);
+	}
+
+	private static function removeControls(controlArray:Array<FlxKey>) {
+		for (i in 0...keyBinds.length) {
+			var controlValue:Int = i*2;
+			var controlsToRemove:Array<FlxKey> = [];
+			for (j in 0...2) {
+				if(controlArray[controlValue+j] != NONE) {
+					controlsToRemove.push(controlArray[controlValue+j]);
+				}
+			}
+			if(controlsToRemove.length > 0) {
+				PlayerSettings.player1.controls.unbindKeys(keyBinds[i][0], controlsToRemove);
+			}
+		}
+	}
+	private static function loadControls(controlArray:Array<FlxKey>) {
+		for (i in 0...keyBinds.length) {
+			var controlValue:Int = i*2;
+			var controlsToAdd:Array<FlxKey> = [];
+			for (j in 0...2) {
+				if(controlArray[controlValue+j] != NONE) {
+					controlsToAdd.push(controlArray[controlValue+j]);
+				}
+			}
+			if(controlsToAdd.length > 0) {
+				PlayerSettings.player1.controls.bindKeys(keyBinds[i][0], controlsToAdd);
+			}
+		}
 	}
 }
