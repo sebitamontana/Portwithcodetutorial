@@ -13,13 +13,14 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.FlxCamera;
+import editors.MasterEditorMenu;
 
 class PauseSubState extends MusicBeatSubstate
 {
 	var grpMenuShit:FlxTypedGroup<Alphabet>;
 
 	var menuItems:Array<String> = [];
-	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Toggle Practice Mode', 'Botplay', 'Chart Editor', 'Exit to menu'];
+	var menuItemsOG:Array<String> = ['Resume', 'Restart Song', 'Change Difficulty', 'Toggle Practice Mode', 'Botplay', 'Credits', 'Editor', 'Exit to menu'];
 	var difficultyChoices = [];
 	var curSelected:Int = 0;
 
@@ -115,15 +116,6 @@ class PauseSubState extends MusicBeatSubstate
 		changeSelection();
 
 		cameras = [FlxG.cameras.list[FlxG.cameras.list.length - 1]];
-
-		#if mobileC
-		addVirtualPad(UP_DOWN, A);
-		
-		var camcontrol = new FlxCamera();
-		FlxG.cameras.add(camcontrol);
-		camcontrol.bgColor.alpha = 0;
-		_virtualpad.cameras = [camcontrol];
-		#end		
 	}
 
 	override function update(elapsed:Float)
@@ -171,8 +163,6 @@ class PauseSubState extends MusicBeatSubstate
 				case 'Change Difficulty':
 					menuItems = difficultyChoices;
 					regenMenu();
-				case "Chart Editor":
-				    MusicBeatState.switchState(new editors.ChartingState());
 				case 'Toggle Practice Mode':
 					PlayState.practiceMode = !PlayState.practiceMode;
 					PlayState.usedPractice = true;
@@ -190,9 +180,35 @@ class PauseSubState extends MusicBeatSubstate
 					PlayState.seenCutscene = false;
 					CustomFadeTransition.nextCamera = transCamera;
 					if(PlayState.isStoryMode) {
-						MusicBeatState.switchState(new StoryMenuState());
+						MusicBeatState.switchState(new MainMenuState());
 					} else {
 						MusicBeatState.switchState(new FreeplayState());
+					}
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					PlayState.usedPractice = false;
+					PlayState.changedDifficulty = false;
+					PlayState.cpuControlled = false;
+				case "Credits":
+					PlayState.deathCounter = 0;
+					PlayState.seenCutscene = false;
+					CustomFadeTransition.nextCamera = transCamera;
+					if(PlayState.isStoryMode) {
+						MusicBeatState.switchState(new CreditsState());
+					} else {
+						MusicBeatState.switchState(new CreditsState());
+					}
+					FlxG.sound.playMusic(Paths.music('freakyMenu'));
+					PlayState.usedPractice = false;
+					PlayState.changedDifficulty = false;
+					PlayState.cpuControlled = false;
+				case "Editor":
+					PlayState.deathCounter = 0;
+					PlayState.seenCutscene = false;
+					CustomFadeTransition.nextCamera = transCamera;
+					if(PlayState.isStoryMode) {
+						MusicBeatState.switchState(new MasterEditorMenu());
+					} else {
+						MusicBeatState.switchState(new MasterEditorMenu());
 					}
 					FlxG.sound.playMusic(Paths.music('freakyMenu'));
 					PlayState.usedPractice = false;

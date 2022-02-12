@@ -4,6 +4,7 @@ package;
 import Discord.DiscordClient;
 #end
 import flixel.FlxG;
+import lime.app.Application;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.addons.transition.FlxTransitionableState;
@@ -51,9 +52,9 @@ class StoryMenuState extends MusicBeatState
 
 	override function create()
 	{
-        #if MODS_ALLOWED
-		Paths.destroyLoadedImages();
- 		#end	
+		#if MODS_ALLOWED
+		Paths.destroyLoadedImages(true);
+		#end
 		WeekData.reloadWeekFiles(true);
 		if(curWeek >= WeekData.weeksList.length) curWeek = 0;
 		persistentUpdate = persistentDraw = true;
@@ -86,6 +87,9 @@ class StoryMenuState extends MusicBeatState
 
 		grpLocks = new FlxTypedGroup<FlxSprite>();
 		add(grpLocks);
+		#if desktop
+		Application.current.window.title = Main.appTitle + ' - Story Mode';
+		#end
 
 		#if desktop
 		// Updating Discord Rich Presence
@@ -178,10 +182,6 @@ class StoryMenuState extends MusicBeatState
 		add(txtWeekTitle);
 
 		changeWeek();
-
-		#if mobileC
-        addVirtualPad(FULL, A_B);
-        #end
 
 		super.create();
 	}
