@@ -43,6 +43,7 @@ class TitleState extends MusicBeatState
 	var credTextShit:Alphabet;
 	var textGroup:FlxGroup;
 	var logoSpr:FlxSprite;
+	var psychintro:FlxSprite;
 
 	var curWacky:Array<String> = [];
 
@@ -52,15 +53,8 @@ class TitleState extends MusicBeatState
 	var easterEggKeyCombination:Array<FlxKey> = [FlxKey.B, FlxKey.B]; //bb stands for bbpanzu cuz he wanted this lmao
 	var lastKeysPressed:Array<FlxKey> = [];
 
-	var mustUpdate:Bool = false;
-	public static var updateVersion:String = '';
-
 	override public function create():Void
 	{
-		#if android
-		FlxG.android.preventDefaultKeys = [BACK];
-		#end
-
 		#if (polymod && !html5)
 		if (sys.FileSystem.exists('mods/')) {
 			var folders:Array<String> = [];
@@ -74,32 +68,9 @@ class TitleState extends MusicBeatState
 				polymod.Polymod.init({modRoot: "mods", dirs: folders});
 			}
 		}
-		#end
-		
-		#if CHECK_FOR_UPDATES
-		if(!closedState) {
-			trace('checking for update');
-			var http = new haxe.Http("https://raw.githubusercontent.com/ShadowMario/FNF-PsychEngine/main/gitVersion.txt");
-			
-			http.onData = function (data:String)
-			{
-				updateVersion = data.split('\n')[0].trim();
-				var curVersion:String = MainMenuState.psychEngineVersion.trim();
-				trace('version online: ' + updateVersion + ', your version: ' + curVersion);
-				if(updateVersion != curVersion) {
-					trace('versions arent matching!');
-					mustUpdate = true;
-				}
-			}
-			
-			http.onError = function (error) {
-				trace('error: $error');
-			}
-			
-			http.request();
-		}
-		#end
 
+		//Gonna finish this later, probably
+		#end
 		FlxG.game.focusLostFramerate = 60;
 		FlxG.sound.muteKeys = muteKeys;
 		FlxG.sound.volumeDownKeys = volumeDownKeys;
@@ -130,7 +101,7 @@ class TitleState extends MusicBeatState
 		#elseif CHARTING
 		MusicBeatState.switchState(new ChartingState());
 		#else
-		if(FlxG.save.data.flashing == null && !FlashingState.leftState) {
+		if(!FlashingState.leftState) {
 			FlxTransitionableState.skipNextTransIn = true;
 			FlxTransitionableState.skipNextTransOut = true;
 			MusicBeatState.switchState(new FlashingState());
@@ -147,6 +118,7 @@ class TitleState extends MusicBeatState
 			});
 		}
 		#end
+		
 	}
 
 	var logoBl:FlxSprite;
@@ -187,7 +159,7 @@ class TitleState extends MusicBeatState
 			}
 		}
 
-		Conductor.changeBPM(102);
+		Conductor.changeBPM(150);
 		persistentUpdate = true;
 
 		var bg:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
@@ -196,7 +168,7 @@ class TitleState extends MusicBeatState
 		// bg.updateHitbox();
 		add(bg);
 
-		logoBl = new FlxSprite(-150, -100);
+		logoBl = new FlxSprite(530, -30);
 		logoBl.frames = Paths.getSparrowAtlas('logoBumpin');
 		logoBl.antialiasing = ClientPrefs.globalAntialiasing;
 		logoBl.animation.addByPrefix('bump', 'logo bumpin', 24);
@@ -207,7 +179,7 @@ class TitleState extends MusicBeatState
 
 		swagShader = new ColorSwap();
 		if(!FlxG.save.data.psykaEasterEgg || !easterEggEnabled) {
-			gfDance = new FlxSprite(FlxG.width * 0.4, FlxG.height * 0.07);
+			gfDance = new FlxSprite(0, 0);
 			gfDance.frames = Paths.getSparrowAtlas('gfDanceTitle');
 			gfDance.animation.addByIndices('danceLeft', 'gfDance', [30, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14], "", 24, false);
 			gfDance.animation.addByIndices('danceRight', 'gfDance', [15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], "", 24, false);
@@ -264,6 +236,14 @@ class TitleState extends MusicBeatState
 		logoSpr.updateHitbox();
 		logoSpr.screenCenter(X);
 		logoSpr.antialiasing = ClientPrefs.globalAntialiasing;
+
+		psychintro = new FlxSprite(0, 340).loadGraphic(Paths.image('psychintro'));
+		add(psychintro);
+		psychintro.visible = false;
+		psychintro.setGraphicSize(Std.int(psychintro.width * 0.55));
+		psychintro.updateHitbox();
+		psychintro.screenCenter(X);
+		psychintro.antialiasing = ClientPrefs.globalAntialiasing;
 
 		FlxTween.tween(credTextShit, {y: credTextShit.y + 20}, 2.9, {ease: FlxEase.quadInOut, type: PINGPONG});
 
@@ -343,15 +323,13 @@ class TitleState extends MusicBeatState
 				// FlxG.sound.music.stop();
 
 				new FlxTimer().start(1, function(tmr:FlxTimer)
+
+			
 				{
-					if (mustUpdate) {
-						MusicBeatState.switchState(new OutdatedState());
-					} else {
-						MusicBeatState.switchState(new MainMenuState());
-					}
+					MusicBeatState.switchState(new MainMenuState());
 					closedState = true;
 				});
-				// FlxG.sound.play(Paths.music('titleShoot'), 0.7);
+
 			}
 			else if(easterEggEnabled)
 			{
@@ -444,7 +422,6 @@ class TitleState extends MusicBeatState
 		}
 	}
 
-	private var sickBeats:Int = 0; //Basically curBeat but won't be skipped if you hold the tab or resize the screen
 	private static var closedState:Bool = false;
 	override function beatHit()
 	{
@@ -462,57 +439,60 @@ class TitleState extends MusicBeatState
 				gfDance.animation.play('danceLeft');
 		}
 
+		FlxG.log.add(curBeat);
+		FlxTween.tween(FlxG.camera, {zoom:1.02}, 0.3, {ease: FlxEase.quadOut, type: BACKWARD});
+
 		if(!closedState) {
-			sickBeats++;
-			switch (sickBeats)
+			switch (curBeat)
 			{
-				case 1:
-					createCoolText(['Psych Engine by'], 45);
-				// credTextShit.visible = true;
-				case 3:
-					addMoreText('Shadow Mario', 45);
-					addMoreText('RiverOaken', 45);
-				// credTextShit.text += '\npresent...';
-				// credTextShit.addText();
 				case 4:
-					deleteCoolText();
-				// credTextShit.visible = false;
-				// credTextShit.text = 'In association \nwith';
-				// credTextShit.screenCenter();
-				case 5:
-					createCoolText(['This is a mod to'], -60);
-				case 7:
-					addMoreText('This game right below lol', -60);
-					logoSpr.visible = true;
-				// credTextShit.text += '\nNewgrounds';
+					createCoolText(['Mod created by'], -60);
+				// credTextShit.visible = true;
 				case 8:
+					addMoreText('ElFranex', -60);
+				case 10:
+			        addMoreText('SebaElGato', -60);
+				case 12:
+			        addMoreText('Kenny', -60);
+				case 13:
+			        addMoreText('TheGabi', -60);
+				case 14:
+			        addMoreText('Kavlik', -60);
+				case 15:
+			        addMoreText('PescadinCringe', -60);
+				case 16:
 					deleteCoolText();
-					logoSpr.visible = false;
+					createCoolText(['Psych Engine by']);
+				case 20:
+					addMoreText('Shadow Mario');
+					addMoreText('RiverOaken');
+					psychintro.visible = true;
+				case 23:
+					deleteCoolText();
+					psychintro.visible = false;
 				// credTextShit.visible = false;
 
 				// credTextShit.text = 'Shoutouts Tom Fulp';
 				// credTextShit.screenCenter();
-				case 9:
-					createCoolText([curWacky[0]]);
+				case 24:
+					createCoolText(['CommunityGame']);
+				case 26:
+					addMoreText('Im waiting you');
 				// credTextShit.visible = true;
-				case 11:
-					addMoreText(curWacky[1]);
-				// credTextShit.text += '\nlmao';
-				case 12:
+				case 28:
 					deleteCoolText();
-				// credTextShit.visible = false;
-				// credTextShit.text = "Friday";
-				// credTextShit.screenCenter();
-				case 13:
+				case 29:
 					addMoreText('Friday');
 				// credTextShit.visible = true;
-				case 14:
+				case 30:
 					addMoreText('Night');
+				// credTextShit.visible = true;
+				case 31:
+					addMoreText('Funkin');
+					addMoreText('Vs Seba');
 				// credTextShit.text += '\nNight';
-				case 15:
-					addMoreText('Funkin'); // credTextShit.text += '\nFunkin';
 
-				case 16:
+				case 32:
 					skipIntro();
 			}
 		}
