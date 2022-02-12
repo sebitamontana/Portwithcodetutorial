@@ -5,7 +5,12 @@ import openfl.utils.Assets;
 import lime.utils.Assets as LimeAssets;
 import lime.utils.AssetLibrary;
 import lime.utils.AssetManifest;
+#if sys
+import sys.io.File;
+import sys.FileSystem;
+#else
 import openfl.utils.Assets;
+#end
 
 using StringTools;
 
@@ -13,9 +18,9 @@ class CoolUtil
 {
 	// [Difficulty name, Chart file suffix]
 	public static var difficultyStuff:Array<Dynamic> = [
-		['Easy', '-easy'],
-		['Normal', ''],
-		['Hard', '-hard']
+		['Original', ''],
+		['Original', ''],
+		['Original', ''],
 	];
 
 	public static function difficultyString():String
@@ -33,7 +38,11 @@ class CoolUtil
 	public static function coolTextFile(path:String):Array<String>
 	{
 		var daList:Array<String> = [];
+		#if sys
+		if(FileSystem.exists(path)) daList = File.getContent(path).trim().split('\n');
+		#else
 		if(Assets.exists(path)) daList = Assets.getText(path).trim().split('\n');
+		#end
 
 		for (i in 0...daList.length)
 		{
@@ -62,7 +71,7 @@ class CoolUtil
 
 	public static function browserLoad(site:String) {
 		#if linux
-		Sys.command('/usr/bin/xdg-open', [site]);
+		Sys.command('/usr/bin/xdg-open', [site, "&"]);
 		#else
 		FlxG.openURL(site);
 		#end
